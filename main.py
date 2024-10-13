@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from twitchio.ext import commands
-import pyautogui
+from pynput.keyboard import Key, Controller
 import time
 
 # Charger les variables d'environnement depuis le fichier .env
@@ -22,8 +22,8 @@ class Bot(commands.Bot):
         print(f'Bot is ready and logged in as | {self.nick}')
 
     async def event_message(self, message):
-        # if message.author.name.lower() == self.nick.lower():
-        #     return
+        if message.author.name.lower() == self.nick.lower():
+            return
 
         print(f'{message.author.name}: {message.content}')
         await self.handle_commands(message)
@@ -36,27 +36,29 @@ def handle_pokemon_command(command):
     if command.lower() in valid_commands:
         inject_command_into_game(command.lower())
 
-# Fonction pour injecter les commandes dans l'émulateur Pokémon
+keyboard = Controller()
+
 def inject_command_into_game(command):
     key_mapping = {
-        "up": "up",
-        "down": "down",
-        "left": "left",
-        "right": "right",
-        "a": "a",
-        "b": "b",
-        "y": "y",
-        "x": "x",
-        "l": "l",
-        "r": "r",
-        "start": "enter",
-        "select": "backspace"
+        "up": Key.up,
+        "down": Key.down,
+        "left": Key.left,
+        "right": Key.right,
+        "a": 'a',  # Assurez-vous que cela correspond aux touches de votre émulateur
+        "b": 'b',
+        "y": 'y',
+        "x": 'x',
+        "l": 'l',
+        "r": 'r',
+        "start": Key.enter,
+        "select": Key.backspace
     }
 
     if command in key_mapping:
-        print(f'key_mapping: {key_mapping[command]}')
-        pyautogui.press(key_mapping[command])
-        time.sleep(0.2)
+        key = key_mapping[command]
+        keyboard.press(key)
+        time.sleep(0.2)  # Pour s'assurer que la touche est enregistrée
+        keyboard.release(key)
 
 bot = Bot()
 bot.run()
